@@ -12,6 +12,73 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    :root {
+      --c-primary: #1C549C;
+      --c-secondary: #6CD3FB;
+      --c-accent: #28F5CC;
+      --c-cta: #FF9500;
+
+      /* Tons claros (para backgrounds suaves) */
+      --c-primary-50: rgba(28,84,156,0.08);
+      --c-secondary-50: rgba(108,211,251,0.16);
+      --c-accent-50: rgba(40,245,204,0.16);
+      --c-cta-50: rgba(255,149,0,0.14);
+
+      /* Sombras */
+      --shadow-primary: 0 10px 25px rgba(28,84,156,0.18);
+      --shadow-cta: 0 10px 25px rgba(255,149,0,0.18);
+    }
+
+    .bg-primary { background: var(--c-primary); }
+    .bg-secondary { background: var(--c-secondary); }
+    .bg-accent { background: var(--c-accent); }
+    .bg-cta { background: var(--c-cta); }
+
+    .text-primary { color: var(--c-primary); }
+    .text-secondary { color: #075985; }
+    .text-accent { color: #0f766e; }
+    .text-cta { color: var(--c-cta); }
+    .text-on-primary { color: rgba(255,255,255,0.85); }
+
+    .bg-primary-soft { background: var(--c-primary-50); }
+    .bg-secondary-soft { background: var(--c-secondary-50); }
+    .bg-accent-soft { background: var(--c-accent-50); }
+    .bg-cta-soft { background: var(--c-cta-50); }
+
+    .border-primary { border-color: rgba(28,84,156,0.28); }
+    .border-secondary { border-color: rgba(108,211,251,0.35); }
+    .border-accent { border-color: rgba(40,245,204,0.35); }
+    .border-cta { border-color: rgba(255,149,0,0.35); }
+
+    .btn-brand {
+      background: linear-gradient(90deg, var(--c-primary), var(--c-accent));
+      color: white;
+      box-shadow: var(--shadow-primary);
+    }
+    .btn-brand:hover { filter: brightness(0.95); }
+
+    .btn-cta {
+      background: linear-gradient(90deg, var(--c-cta), var(--c-primary));
+      color: white;
+      box-shadow: var(--shadow-cta);
+    }
+    .btn-cta:hover { filter: brightness(0.95); }
+
+    .ring-brand:focus { outline: none; box-shadow: 0 0 0 4px rgba(108,211,251,0.35); }
+
+    .hero-gradient {
+      background: linear-gradient(90deg, #143c70, var(--c-primary), #143c70);
+    }
+
+    .hero-orb-secondary { background: var(--c-secondary); }
+
+    .result-header-low {
+      background: linear-gradient(90deg, var(--c-primary), var(--c-accent));
+    }
+    .result-header-high {
+      background: linear-gradient(90deg, var(--c-cta), var(--c-primary));
+    }
+
     /* Modal helpers */
     .modal-backdrop { display:none; }
     .modal-backdrop.open { display:flex; }
@@ -26,19 +93,19 @@
   </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100/60 to-slate-100">
   <!-- Hero -->
   <header class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900"></div>
+    <div class="absolute inset-0 hero-gradient"></div>
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-300 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 hero-orb-secondary rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
     </div>
 
     <div class="relative px-4 py-12 md:py-20">
       <div class="max-w-4xl mx-auto text-center">
         <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-          <span class="text-blue-100 text-sm font-medium">Spa Médico Adventista Cevisa</span>
+          <span class="text-on-primary text-sm font-medium">Spa Médico Adventista Cevisa</span>
         </div>
 
         <h1 class="text-3xl md:text-5xl font-light text-white mb-4 tracking-tight">
@@ -46,7 +113,7 @@
           <span class="block font-semibold mt-1">Apneia Obstrutiva do Sono</span>
         </h1>
 
-        <p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+        <p class="text-on-primary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
           Questionário STOP-Bang — uma ferramenta científica para avaliar indicadores de risco em menos de 3 minutos
         </p>
       </div>
@@ -62,11 +129,11 @@
           <div class="p-6 pb-4">
             <div class="flex items-center justify-between mb-4">
               <span class="text-sm text-slate-500" id="stepLabel">Pergunta 1 de 8</span>
-              <span class="text-2xl font-bold text-blue-600" id="letterBadge">S</span>
+              <span class="text-2xl font-bold text-primary" id="letterBadge">S</span>
             </div>
 
             <div class="h-1.5 rounded-full progress-track overflow-hidden">
-              <div class="progress-fill bg-blue-600" id="progressFill"></div>
+              <div class="progress-fill bg-primary" id="progressFill"></div>
             </div>
           </div>
 
@@ -84,7 +151,7 @@
               </button>
 
               <button id="nextBtn"
-                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-6 btn-brand disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled
               >
                 <span id="nextBtnText">Próxima</span>
@@ -98,7 +165,7 @@
       <!-- RESULTS -->
       <section id="resultsSection" class="hidden fade-in space-y-6">
         <div class="shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden">
-          <div id="resultHeader" class="p-6 bg-gradient-to-r from-emerald-500 to-teal-500">
+          <div id="resultHeader" class="p-6 result-header-low">
             <div class="text-center text-white">
               <p class="text-sm font-medium opacity-90 mb-2">Seu resultado</p>
               <div class="text-6xl font-bold mb-2">
@@ -109,7 +176,7 @@
           </div>
 
           <div class="p-6">
-            <div id="resultBox" class="p-4 rounded-xl mb-6 bg-emerald-50">
+            <div id="resultBox" class="p-4 rounded-xl mb-6 bg-accent-soft">
               <div class="flex items-start gap-3">
                 <div class="w-5 h-5 mt-0.5 flex-shrink-0" id="resultIcon"></div>
                 <div>
@@ -131,7 +198,7 @@
                href="#"
                target="_blank"
                rel="noopener noreferrer"
-               class="flex items-center justify-center gap-3 w-full py-4 px-6 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/25">
+               class="flex items-center justify-center gap-3 w-full py-4 px-6 btn-cta rounded-xl font-semibold transition-all">
               <span>💬</span>
               Falar com o Spa Médico Cevisa
             </a>
@@ -176,10 +243,10 @@
       </div>
 
       <div class="p-6 space-y-4">
-        <div class="bg-gradient-to-r from-blue-50 to-slate-50 rounded-xl p-4 text-center">
+        <div class="bg-secondary-soft rounded-xl p-4 text-center">
           <p class="text-sm text-slate-500 mb-1">Prévia do resultado</p>
-          <p class="text-3xl font-bold text-blue-600">
-            <span id="modalScore">0</span><span class="text-lg text-blue-400">/8 pontos</span>
+          <p class="text-3xl font-bold text-primary">
+            <span id="modalScore">0</span><span class="text-lg text-secondary">/8 pontos</span>
           </p>
         </div>
 
@@ -187,19 +254,19 @@
           <div>
             <label class="text-slate-700 text-sm font-medium">Nome completo</label>
             <input id="leadName"
-              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm ring-brand"
               placeholder="Seu nome" />
           </div>
           <div>
             <label class="text-slate-700 text-sm font-medium">WhatsApp</label>
             <input id="leadWhatsapp"
-              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm ring-brand"
               placeholder="(00) 00000-0000" />
           </div>
         </div>
 
         <button id="submitLeadBtn"
-          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-12 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-12 w-full btn-brand disabled:opacity-50 disabled:cursor-not-allowed"
           disabled>
           Ver meu resultado completo
         </button>
@@ -328,11 +395,11 @@
 
     function radioCard(groupId, value, label, checked) {
       const active = checked
-        ? 'border-blue-500 bg-blue-50'
+        ? 'border-primary bg-primary-soft'
         : 'border-slate-200 hover:border-slate-300';
 
-      const dotBorder = checked ? 'border-blue-500' : 'border-slate-300';
-      const dotInner = checked ? '<div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>' : '';
+      const dotBorder = checked ? 'border-primary' : 'border-slate-300';
+      const dotInner = checked ? '<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>' : '';
 
       return `
         <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${active}">
@@ -354,13 +421,13 @@
             <div>
               <label class="text-slate-600 mb-2 block text-sm font-medium">Peso (kg)</label>
               <input id="weightInput" type="number" placeholder="70"
-                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 ring-brand"
                 value="${escapeHtml(bmiData.weight)}" />
             </div>
             <div>
               <label class="text-slate-600 mb-2 block text-sm font-medium">Altura (cm)</label>
               <input id="heightInput" type="number" placeholder="170"
-                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 ring-brand"
                 value="${escapeHtml(bmiData.height)}" />
             </div>
           </div>
@@ -382,16 +449,16 @@
           <div>
             <label class="text-slate-600 mb-2 block text-sm font-medium">Circunferência (cm)</label>
             <input id="neckInput" type="number" placeholder="38"
-              class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 ring-brand"
               value="${escapeHtml(neckSize)}" />
           </div>
 
-          <div class="bg-blue-50 rounded-xl p-4">
+          <div class="bg-secondary-soft rounded-xl p-4">
             <div class="flex items-start gap-3">
-              <div class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0">ℹ️</div>
+              <div class="w-5 h-5 text-primary mt-0.5 flex-shrink-0">ℹ️</div>
               <div>
-                <p class="text-sm font-medium text-blue-800 mb-1">Como medir o pescoço</p>
-                <p class="text-sm text-blue-700">
+                <p class="text-sm font-medium text-primary mb-1">Como medir o pescoço</p>
+                <p class="text-sm text-secondary">
                   Use uma fita métrica flexível. Posicione-a horizontalmente na base do pescoço,
                   logo abaixo do pomo de Adão (para homens) ou na parte mais larga do pescoço.
                 </p>
@@ -408,8 +475,8 @@
       $('questionArea').innerHTML = `
         <div class="space-y-6">
           <div class="flex items-start gap-4">
-            <div class="p-3 bg-blue-50 rounded-xl">
-              <div class="w-6 h-6 text-blue-600">🟦</div>
+            <div class="p-3 bg-primary-soft rounded-xl">
+              <div class="w-6 h-6 text-primary">🟦</div>
             </div>
             <div class="flex-1">
               <h3 class="text-xl font-semibold text-slate-800 mb-2">${q.question}</h3>
@@ -544,23 +611,23 @@
       // Header gradient
       $('resultHeader').className = 'p-6 ' + (
         score <= 2
-          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-          : 'bg-gradient-to-r from-amber-500 to-orange-500'
+          ? 'result-header-low'
+          : 'result-header-high'
       );
 
       // Box copy
       if (score <= 2) {
-        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-emerald-50';
-        $('resultTitle').className = 'font-medium text-emerald-800 mb-1';
-        $('resultText').className = 'text-sm text-emerald-700';
+        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-accent-soft';
+        $('resultTitle').className = 'font-medium text-accent mb-1';
+        $('resultText').className = 'text-sm text-secondary';
         $('resultTitle').textContent = 'Resultado favorável';
         $('resultText').textContent =
           'Com base nas suas respostas, você apresenta menor probabilidade de ter apneia obstrutiva do sono. No entanto, se você tem sintomas que o preocupam, considere conversar com um profissional de saúde.';
         $('resultIcon').textContent = '✅';
       } else {
-        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-amber-50';
-        $('resultTitle').className = 'font-medium text-amber-800 mb-1';
-        $('resultText').className = 'text-sm text-amber-700';
+        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-cta-soft';
+        $('resultTitle').className = 'font-medium text-cta mb-1';
+        $('resultText').className = 'text-sm text-secondary';
         $('resultTitle').textContent = 'Atenção recomendada';
         $('resultText').innerHTML =
           'Com base nas suas respostas, você apresenta maior probabilidade de ter apneia obstrutiva do sono. <strong>Recomendamos que você procure uma avaliação médica especializada</strong> para uma análise completa.';
@@ -581,7 +648,7 @@
           (L==='G' && answers['G']==='male')
         );
         return `
-          <div class="text-center p-2 rounded-lg ${positive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}">
+          <div class="text-center p-2 rounded-lg ${positive ? 'bg-primary-soft text-primary' : 'bg-slate-100 text-slate-500'}">
             <span class="font-bold">${L}</span>
           </div>
         `;
@@ -671,8 +738,8 @@
     <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
       <div class="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
         <div class="text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-orange-100">
-            <div class="text-orange-600 text-2xl">⚠️</div>
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-cta-soft">
+            <div class="text-cta text-2xl">⚠️</div>
           </div>
           <h1 class="text-3xl font-bold text-slate-900 mb-4">Access Restricted</h1>
           <p class="text-slate-600 mb-8">
