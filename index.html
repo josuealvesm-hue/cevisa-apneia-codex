@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Triagem STOP-Bang — Spa Médico Adventista Cevisa</title>
+
+  <!-- Tailwind via CDN (troque por build próprio em produção) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- (Opcional) Ícones lucide via web component -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Modal helpers */
+    .modal-backdrop { display:none; }
+    .modal-backdrop.open { display:flex; }
+
+    /* Pequenas transições */
+    .fade-in { animation: fadeIn .25s ease-out; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform: translateY(0);} }
+
+    /* Progress bar */
+    .progress-track { background: rgb(241 245 249); }
+    .progress-fill { height: 100%; width: 0%; transition: width .25s ease; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+  <!-- Hero -->
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900"></div>
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-300 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+    </div>
+
+    <div class="relative px-4 py-12 md:py-20">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+          <span class="text-blue-100 text-sm font-medium">Spa Médico Adventista Cevisa</span>
+        </div>
+
+        <h1 class="text-3xl md:text-5xl font-light text-white mb-4 tracking-tight">
+          Triagem de Risco para
+          <span class="block font-semibold mt-1">Apneia Obstrutiva do Sono</span>
+        </h1>
+
+        <p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          Questionário STOP-Bang — uma ferramenta científica para avaliar indicadores de risco em menos de 3 minutos
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 py-8 md:py-12 -mt-8">
+    <div class="max-w-xl mx-auto" id="appRoot">
+
+      <!-- QUIZ CARD -->
+      <section id="quizSection" class="fade-in">
+        <div class="shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden">
+          <div class="p-6 pb-4">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-sm text-slate-500" id="stepLabel">Pergunta 1 de 8</span>
+              <span class="text-2xl font-bold text-blue-600" id="letterBadge">S</span>
+            </div>
+
+            <div class="h-1.5 rounded-full progress-track overflow-hidden">
+              <div class="progress-fill bg-blue-600" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="px-6 pb-6 pt-2">
+            <div id="questionArea" class="space-y-6">
+              <!-- Conteúdo da pergunta renderizado via JS -->
+            </div>
+
+            <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+              <button id="prevBtn"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 text-slate-500 hover:text-slate-700 disabled:opacity-50"
+                disabled
+              >
+                Voltar
+              </button>
+
+              <button id="nextBtn"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                <span id="nextBtnText">Próxima</span>
+                <span class="ml-2">›</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section id="resultsSection" class="hidden fade-in space-y-6">
+        <div class="shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden">
+          <div id="resultHeader" class="p-6 bg-gradient-to-r from-emerald-500 to-teal-500">
+            <div class="text-center text-white">
+              <p class="text-sm font-medium opacity-90 mb-2">Seu resultado</p>
+              <div class="text-6xl font-bold mb-2">
+                <span id="scoreBig">0</span><span class="text-3xl opacity-75">/8</span>
+              </div>
+              <p class="text-lg font-medium" id="scoreLabel">Menor probabilidade</p>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <div id="resultBox" class="p-4 rounded-xl mb-6 bg-emerald-50">
+              <div class="flex items-start gap-3">
+                <div class="w-5 h-5 mt-0.5 flex-shrink-0" id="resultIcon"></div>
+                <div>
+                  <p class="font-medium mb-1" id="resultTitle">Resultado favorável</p>
+                  <p class="text-sm" id="resultText"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <h4 class="font-semibold text-slate-700 mb-3">Resumo das respostas</h4>
+              <div class="grid grid-cols-4 gap-2" id="breakdownGrid"></div>
+              <p class="text-xs text-slate-500 mt-2 text-center">
+                Letras azuis = fatores positivos identificados
+              </p>
+            </div>
+
+            <a id="whatsBtn"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="flex items-center justify-center gap-3 w-full py-4 px-6 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/25">
+              <span>💬</span>
+              Falar com o Spa Médico Cevisa
+            </a>
+
+            <p class="text-center text-sm text-slate-500 mt-4">
+              Nossa equipe está pronta para orientá-lo
+            </p>
+          </div>
+        </div>
+
+        <div class="border-slate-200 bg-slate-50 rounded-xl">
+          <div class="p-4">
+            <div class="flex items-start gap-3">
+              <div class="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0">ℹ️</div>
+              <div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  <strong>Aviso importante:</strong> Esta é uma ferramenta educativa de triagem baseada no questionário STOP-Bang,
+                  validado cientificamente. <strong>Não constitui diagnóstico médico.</strong> Apenas um profissional de saúde
+                  qualificado pode diagnosticar a apneia obstrutiva do sono através de exames específicos como a polissonografia.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="restartBtn"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 w-full text-slate-500 hover:text-slate-700">
+          Refazer triagem
+        </button>
+      </section>
+    </div>
+  </main>
+
+  <!-- LEAD MODAL -->
+  <div id="leadModal" class="modal-backdrop fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-md rounded-xl bg-white shadow-xl">
+      <div class="p-6 border-b border-slate-100">
+        <h2 class="text-xl font-semibold">Seu resultado está pronto!</h2>
+        <p class="text-slate-500 mt-1 text-sm">
+          Para visualizar a interpretação completa, informe seus dados de contato.
+        </p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="bg-gradient-to-r from-blue-50 to-slate-50 rounded-xl p-4 text-center">
+          <p class="text-sm text-slate-500 mb-1">Prévia do resultado</p>
+          <p class="text-3xl font-bold text-blue-600">
+            <span id="modalScore">0</span><span class="text-lg text-blue-400">/8 pontos</span>
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="text-slate-700 text-sm font-medium">Nome completo</label>
+            <input id="leadName"
+              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Seu nome" />
+          </div>
+          <div>
+            <label class="text-slate-700 text-sm font-medium">WhatsApp</label>
+            <input id="leadWhatsapp"
+              class="mt-1.5 h-11 w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="(00) 00000-0000" />
+          </div>
+        </div>
+
+        <button id="submitLeadBtn"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-12 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled>
+          Ver meu resultado completo
+        </button>
+
+        <p class="text-xs text-slate-400 text-center">
+          Seus dados estão seguros e não serão compartilhados com terceiros.
+        </p>
+
+        <button id="closeModalBtn"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 w-full text-slate-500 hover:text-slate-700">
+          Agora não
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="px-4 py-8 mt-8 border-t border-slate-200 bg-white/50">
+    <div class="max-w-xl mx-auto text-center">
+      <p class="text-sm text-slate-500 mb-2">Spa Médico Adventista Cevisa</p>
+      <p class="text-xs text-slate-400">
+        © <span id="yearNow"></span> — Ferramenta educativa de triagem STOP-Bang
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // =========================
+    // CONFIG
+    // =========================
+    const LEAD_ENDPOINT = "https://api.exemplo.com/leads"; // trocar
+    const WHATSAPP_NUMBER = "5511999999999"; // trocar
+    const SEND_RESPONSES = true;
+
+    // =========================
+    // STATE
+    // =========================
+    let currentStep = 0;
+    let answers = {};          // S,T,O,P,A,G
+    let bmiData = { weight: "", height: "" };
+    let neckSize = "";
+    let score = 0;
+
+    // =========================
+    // QUESTIONS
+    // =========================
+    const questions = [
+      { id:'S', letter:'S', question:'Você ronca alto?', description:'Alto o suficiente para ser ouvido através de portas fechadas ou seu parceiro(a) cutuca você por causa do ronco', type:'yesno' },
+      { id:'T', letter:'T', question:'Você se sente cansado(a) durante o dia?', description:'Fadiga, sonolência ou sensação de esgotamento mesmo após uma noite de sono', type:'yesno' },
+      { id:'O', letter:'O', question:'Alguém observou você parar de respirar durante o sono?', description:'Pausas na respiração ou engasgos notados por outra pessoa', type:'yesno' },
+      { id:'P', letter:'P', question:'Você tem pressão alta ou trata hipertensão?', description:'Diagnóstico médico de hipertensão arterial ou uso de medicamentos para pressão', type:'yesno' },
+      { id:'B', letter:'B', question:'Qual é seu peso e altura?', description:'Usaremos para calcular seu IMC (Índice de Massa Corporal)', type:'bmi' },
+      { id:'A', letter:'A', question:'Você tem mais de 50 anos?', description:'A idade é um fator relevante na avaliação', type:'yesno' },
+      { id:'N', letter:'N', question:'Qual é a circunferência do seu pescoço?', description:'Meça na base do pescoço, na altura do pomo de Adão', type:'neck' },
+      { id:'G', letter:'G', question:'Qual é o seu sexo biológico?', description:'Sexo atribuído ao nascimento', type:'gender' },
+    ];
+
+    // =========================
+    // HELPERS
+    // =========================
+    const $ = (id) => document.getElementById(id);
+
+    function calculateBMI() {
+      const w = parseFloat(bmiData.weight);
+      const h = parseFloat(bmiData.height);
+      if (!w || !h) return 0;
+      const hm = h / 100;
+      return w / (hm * hm);
+    }
+
+    function calculateScore() {
+      let total = 0;
+      if (answers['S'] === 'yes') total++;
+      if (answers['T'] === 'yes') total++;
+      if (answers['O'] === 'yes') total++;
+      if (answers['P'] === 'yes') total++;
+      if (answers['A'] === 'yes') total++;
+      if (calculateBMI() > 35) total++;
+      if (parseFloat(neckSize) > 40) total++;
+      if (answers['G'] === 'male') total++;
+      return total;
+    }
+
+    function getRiskLevel(s) {
+      return (s <= 2) ? 'baixo' : 'alto';
+    }
+
+    function canProceed() {
+      const q = questions[currentStep];
+      if (q.type === 'bmi') return !!(bmiData.weight && bmiData.height);
+      if (q.type === 'neck') return neckSize !== '';
+      if (q.type === 'gender') return answers[q.id] === 'male' || answers[q.id] === 'female';
+      return answers[q.id] === 'yes' || answers[q.id] === 'no';
+    }
+
+    function setProgress() {
+      $('stepLabel').textContent = `Pergunta ${currentStep + 1} de ${questions.length}`;
+      $('letterBadge').textContent = questions[currentStep].letter;
+      const progress = ((currentStep + 1) / questions.length) * 100;
+      $('progressFill').style.width = progress + '%';
+
+      $('prevBtn').disabled = (currentStep === 0);
+      $('nextBtnText').textContent = (currentStep === questions.length - 1) ? 'Ver Resultado' : 'Próxima';
+      $('nextBtn').disabled = !canProceed();
+    }
+
+    function renderYesNo(q) {
+      const val = answers[q.id] || '';
+      return `
+        <div class="space-y-3 pt-4">
+          ${radioCard(q.id, 'yes', 'Sim', val === 'yes')}
+          ${radioCard(q.id, 'no', 'Não', val === 'no')}
+        </div>
+      `;
+    }
+
+    function renderGender(q) {
+      const val = answers[q.id] || '';
+      return `
+        <div class="space-y-3 pt-4">
+          ${radioCard(q.id, 'male', 'Masculino', val === 'male')}
+          ${radioCard(q.id, 'female', 'Feminino', val === 'female')}
+        </div>
+      `;
+    }
+
+    function radioCard(groupId, value, label, checked) {
+      const active = checked
+        ? 'border-blue-500 bg-blue-50'
+        : 'border-slate-200 hover:border-slate-300';
+
+      const dotBorder = checked ? 'border-blue-500' : 'border-slate-300';
+      const dotInner = checked ? '<div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>' : '';
+
+      return `
+        <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${active}">
+          <input type="radio" name="${groupId}" value="${value}" class="sr-only" ${checked ? 'checked' : ''} />
+          <div class="w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${dotBorder}">
+            ${dotInner}
+          </div>
+          <span class="text-slate-700 font-medium">${label}</span>
+        </label>
+      `;
+    }
+
+    function renderBMI() {
+      const bmi = calculateBMI();
+      const has = bmiData.weight && bmiData.height;
+      return `
+        <div class="space-y-4 pt-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-slate-600 mb-2 block text-sm font-medium">Peso (kg)</label>
+              <input id="weightInput" type="number" placeholder="70"
+                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value="${escapeHtml(bmiData.weight)}" />
+            </div>
+            <div>
+              <label class="text-slate-600 mb-2 block text-sm font-medium">Altura (cm)</label>
+              <input id="heightInput" type="number" placeholder="170"
+                class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value="${escapeHtml(bmiData.height)}" />
+            </div>
+          </div>
+
+          ${has ? `
+            <div class="bg-slate-50 rounded-xl p-4">
+              <p class="text-sm text-slate-600">
+                Seu IMC calculado: <span class="font-semibold text-slate-800">${bmi.toFixed(1)}</span>
+              </p>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderNeck() {
+      return `
+        <div class="space-y-4 pt-4">
+          <div>
+            <label class="text-slate-600 mb-2 block text-sm font-medium">Circunferência (cm)</label>
+            <input id="neckInput" type="number" placeholder="38"
+              class="h-12 w-full text-lg rounded-md border border-slate-200 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value="${escapeHtml(neckSize)}" />
+          </div>
+
+          <div class="bg-blue-50 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+              <div class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0">ℹ️</div>
+              <div>
+                <p class="text-sm font-medium text-blue-800 mb-1">Como medir o pescoço</p>
+                <p class="text-sm text-blue-700">
+                  Use uma fita métrica flexível. Posicione-a horizontalmente na base do pescoço,
+                  logo abaixo do pomo de Adão (para homens) ou na parte mais larga do pescoço.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderQuestion() {
+      const q = questions[currentStep];
+
+      $('questionArea').innerHTML = `
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-blue-50 rounded-xl">
+              <div class="w-6 h-6 text-blue-600">🟦</div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xl font-semibold text-slate-800 mb-2">${q.question}</h3>
+              <p class="text-slate-500 text-sm leading-relaxed">${q.description}</p>
+            </div>
+          </div>
+
+          ${
+            q.type === 'bmi' ? renderBMI() :
+            q.type === 'neck' ? renderNeck() :
+            q.type === 'gender' ? renderGender(q) :
+            renderYesNo(q)
+          }
+        </div>
+      `;
+
+      // Bind events for dynamic inputs
+      if (q.type === 'bmi') {
+        const w = $('weightInput');
+        const h = $('heightInput');
+        w.addEventListener('input', (e) => {
+          bmiData.weight = e.target.value;
+          renderQuestion(); // re-render pra atualizar IMC
+          setProgress();
+        });
+        h.addEventListener('input', (e) => {
+          bmiData.height = e.target.value;
+          renderQuestion();
+          setProgress();
+        });
+      }
+
+      if (q.type === 'neck') {
+        $('neckInput').addEventListener('input', (e) => {
+          neckSize = e.target.value;
+          setProgress();
+        });
+      }
+
+      // Radio handlers
+      const radios = $('questionArea').querySelectorAll('input[type="radio"]');
+      radios.forEach(r => {
+        r.addEventListener('change', (e) => {
+          answers[q.id] = e.target.value;
+          renderQuestion(); // re-render pra atualizar estilos
+          setProgress();
+        });
+      });
+    }
+
+    function openModal() {
+      $('leadModal').classList.add('open');
+      $('modalScore').textContent = score;
+      updateLeadSubmitState();
+    }
+
+    function closeModal() {
+      $('leadModal').classList.remove('open');
+    }
+
+    function updateLeadSubmitState() {
+      const name = $('leadName').value.trim();
+      const wa = $('leadWhatsapp').value.trim();
+      $('submitLeadBtn').disabled = !(name && wa);
+    }
+
+    async function sendLeadData() {
+      const name = $('leadName').value.trim();
+      const whatsapp = $('leadWhatsapp').value.trim();
+
+      $('submitLeadBtn').disabled = true;
+      $('submitLeadBtn').textContent = 'Enviando...';
+
+      const finalScore = calculateScore();
+      const riskLevel = getRiskLevel(finalScore);
+
+      const payload = {
+        name,
+        whatsapp,
+        score: finalScore,
+        faixa: riskLevel,
+        timestamp: new Date().toISOString(),
+      };
+
+      if (SEND_RESPONSES) {
+        payload.responses = {
+          ronca: answers['S'],
+          cansaco: answers['T'],
+          parada_respiracao: answers['O'],
+          hipertensao: answers['P'],
+          imc: calculateBMI().toFixed(1),
+          idade_maior_50: answers['A'],
+          circunferencia_pescoco: neckSize,
+          sexo: answers['G'],
+        };
+      }
+
+      try {
+        await fetch(LEAD_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch (err) {
+        console.log('Lead data (fallback):', payload);
+      }
+
+      closeModal();
+      showResults(finalScore);
+
+      $('submitLeadBtn').textContent = 'Ver meu resultado completo';
+    }
+
+    function buildWhatsAppLink(finalScore) {
+      const riskLevel = getRiskLevel(finalScore);
+      const faixaText = (riskLevel === 'baixo') ? 'Menor probabilidade' : 'Maior probabilidade';
+      const message = encodeURIComponent(
+        `Olá! Fiz a triagem STOP-Bang no site do Spa Médico Cevisa e tive score ${finalScore}/8 (${faixaText}). Gostaria de orientação.`
+      );
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    }
+
+    function showResults(finalScore) {
+      score = finalScore;
+
+      $('quizSection').classList.add('hidden');
+      $('resultsSection').classList.remove('hidden');
+
+      $('scoreBig').textContent = score;
+      $('scoreLabel').textContent = (score <= 2) ? 'Menor probabilidade' : 'Maior probabilidade';
+
+      // Header gradient
+      $('resultHeader').className = 'p-6 ' + (
+        score <= 2
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+          : 'bg-gradient-to-r from-amber-500 to-orange-500'
+      );
+
+      // Box copy
+      if (score <= 2) {
+        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-emerald-50';
+        $('resultTitle').className = 'font-medium text-emerald-800 mb-1';
+        $('resultText').className = 'text-sm text-emerald-700';
+        $('resultTitle').textContent = 'Resultado favorável';
+        $('resultText').textContent =
+          'Com base nas suas respostas, você apresenta menor probabilidade de ter apneia obstrutiva do sono. No entanto, se você tem sintomas que o preocupam, considere conversar com um profissional de saúde.';
+        $('resultIcon').textContent = '✅';
+      } else {
+        $('resultBox').className = 'p-4 rounded-xl mb-6 bg-amber-50';
+        $('resultTitle').className = 'font-medium text-amber-800 mb-1';
+        $('resultText').className = 'text-sm text-amber-700';
+        $('resultTitle').textContent = 'Atenção recomendada';
+        $('resultText').innerHTML =
+          'Com base nas suas respostas, você apresenta maior probabilidade de ter apneia obstrutiva do sono. <strong>Recomendamos que você procure uma avaliação médica especializada</strong> para uma análise completa.';
+        $('resultIcon').textContent = '⚠️';
+      }
+
+      // Breakdown grid
+      const letters = ['S','T','O','P','B','A','N','G'];
+      const html = letters.map(L => {
+        const positive = (
+          (L==='S' && answers['S']==='yes') ||
+          (L==='T' && answers['T']==='yes') ||
+          (L==='O' && answers['O']==='yes') ||
+          (L==='P' && answers['P']==='yes') ||
+          (L==='B' && calculateBMI() > 35) ||
+          (L==='A' && answers['A']==='yes') ||
+          (L==='N' && parseFloat(neckSize) > 40) ||
+          (L==='G' && answers['G']==='male')
+        );
+        return `
+          <div class="text-center p-2 rounded-lg ${positive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}">
+            <span class="font-bold">${L}</span>
+          </div>
+        `;
+      }).join('');
+      $('breakdownGrid').innerHTML = html;
+
+      // WhatsApp CTA
+      $('whatsBtn').href = buildWhatsAppLink(score);
+    }
+
+    function resetAll() {
+      currentStep = 0;
+      answers = {};
+      bmiData = { weight:"", height:"" };
+      neckSize = "";
+      score = 0;
+
+      $('leadName').value = '';
+      $('leadWhatsapp').value = '';
+
+      $('resultsSection').classList.add('hidden');
+      $('quizSection').classList.remove('hidden');
+
+      renderQuestion();
+      setProgress();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#039;');
+    }
+
+    // =========================
+    // EVENTS
+    // =========================
+    $('nextBtn').addEventListener('click', () => {
+      if (!canProceed()) return;
+
+      if (currentStep < questions.length - 1) {
+        currentStep++;
+        renderQuestion();
+        setProgress();
+      } else {
+        // Final
+        score = calculateScore();
+        $('modalScore').textContent = score;
+        openModal();
+      }
+    });
+
+    $('prevBtn').addEventListener('click', () => {
+      if (currentStep === 0) return;
+      currentStep--;
+      renderQuestion();
+      setProgress();
+    });
+
+    $('restartBtn').addEventListener('click', resetAll);
+
+    $('closeModalBtn').addEventListener('click', closeModal);
+    $('leadName').addEventListener('input', updateLeadSubmitState);
+    $('leadWhatsapp').addEventListener('input', updateLeadSubmitState);
+
+    $('submitLeadBtn').addEventListener('click', sendLeadData);
+
+    // Fechar modal clicando fora
+    $('leadModal').addEventListener('click', (e) => {
+      if (e.target === $('leadModal')) closeModal();
+    });
+
+    // =========================
+    // INIT
+    // =========================
+    $('yearNow').textContent = new Date().getFullYear();
+
+    renderQuestion();
+    setProgress();
+  </script>
+
+  <!-- Página separada: UserNotRegisteredError (HTML simples) -->
+  <!-- Se você quiser em outro arquivo, copie esse bloco e use como /not-registered.html -->
+  <template id="notRegisteredTemplate">
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <div class="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-orange-100">
+            <div class="text-orange-600 text-2xl">⚠️</div>
+          </div>
+          <h1 class="text-3xl font-bold text-slate-900 mb-4">Access Restricted</h1>
+          <p class="text-slate-600 mb-8">
+            You are not registered to use this application. Please contact the app administrator to request access.
+          </p>
+          <div class="p-4 bg-slate-50 rounded-md text-sm text-slate-600">
+            <p>If you believe this is an error, you can:</p>
+            <ul class="list-disc list-inside mt-2 space-y-1">
+              <li>Verify you are logged in with the correct account</li>
+              <li>Contact the app administrator for access</li>
+              <li>Try logging out and back in again</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+</body>
+</html>
